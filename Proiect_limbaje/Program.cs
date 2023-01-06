@@ -78,7 +78,8 @@ namespace Proiect_limbaje
    
     enum TipAtomLexical
     {
-        NumarAtomLexical,
+        NumarIntAtomLexical,
+        NumarDoubleAtomLexical,
         PlusAtomLexical,
         MinusAtomLexical,
         StarAtomLexical,

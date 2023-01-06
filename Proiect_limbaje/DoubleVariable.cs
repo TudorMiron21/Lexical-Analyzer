@@ -10,12 +10,12 @@ namespace Proiect_limbaje
     {
         public double Value { get; set; }
 
-        public DoubleVariable(string Name, double Value, bool IsInitialised) : base(Name, IsInitialised)
+        public DoubleVariable(string Name, double Value, bool IsInitialised,TipDate tipDate) : base(Name, IsInitialised,tipDate)
         {
             this.Value = Value;
         }
 
-        public DoubleVariable(string Name, bool IsInitialised) : base(Name, IsInitialised) { }
+        public DoubleVariable(string Name, bool IsInitialised, TipDate tipDate) : base(Name, IsInitialised, tipDate) { }
 
         public DoubleVariable() : base() { }
     }

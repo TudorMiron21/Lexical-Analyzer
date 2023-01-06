@@ -4,19 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace Proiect_limbaje
 {
-    abstract class Variable
+    public enum TipDate { Int, Double, String};
+    public abstract class Variable
     {
-        private string Name { get; set; } 
+        public TipDate tipDate { get; set; }
+        public string Name { get; set; } 
+        public bool IsInitialised { get; set; }
 
-        private bool IsInitialised { get; set; }
-
-        public Variable(string name ,bool isInitialised)
+        public Variable(string name ,bool isInitialised,TipDate tipDate)
         {
             Name = name;
        
             IsInitialised = isInitialised;
+            this.tipDate = tipDate;
         }
 
         public Variable() { }

@@ -61,17 +61,34 @@ namespace Proiect_limbaje
             //numere
             if (char.IsDigit(get_SimbolCurent))
             {
+                bool dot_detected = false;
+                bool conversion_error = false;
                 int start = index;
                 do
                 {
+                    if (get_SimbolCurent == '.')
+                        dot_detected = true;    
+                    if (get_SimbolCurent == ';')
+                        break;
                     IncrementIndex();
-                } while (char.IsDigit(get_SimbolCurent));
+                } while (char.IsDigit(get_SimbolCurent) || get_SimbolCurent == '.');
 
                 string val = text.Substring(start, index - start);
-                int res;
-                if (Int32.TryParse(val, out res)) // facem conversia de la string la int
-                    return new AtomLexical(TipAtomLexical.NumarAtomLexical, val, res, start);
+                int res_int;
+                double res_double;
+
+                if (dot_detected)
+                    if (Double.TryParse(val, out res_double))
+                        return new AtomLexical(TipAtomLexical.NumarDoubleAtomLexical, val, res_double, start);
+                    else
+                        conversion_error = true;
+
+                if (Int32.TryParse(val, out res_int)) // facem conversia de la string la int
+                    return new AtomLexical(TipAtomLexical.NumarIntAtomLexical, val, res_int, start);
                 else
+                    conversion_error = true;
+
+                if(conversion_error)
                 {
                     erori.Add($"sirul de caract {val} nu a putut fi parsat la int32");
                 }
@@ -85,7 +102,7 @@ namespace Proiect_limbaje
                 do
                 {
                     IncrementIndex();
-                    if (get_SimbolCurent == '\0' || get_SimbolCurent =='=' || get_SimbolCurent ==';' || get_SimbolCurent == '"')
+                    if (get_SimbolCurent == '\0' || get_SimbolCurent =='=' || get_SimbolCurent ==';' || get_SimbolCurent == '"' || get_SimbolCurent==',')
                         break;
                 }while (!char.IsWhiteSpace(get_SimbolCurent));
 

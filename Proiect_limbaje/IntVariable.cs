@@ -10,12 +10,12 @@ namespace Proiect_limbaje
     {
         public int Value { get; set; }
 
-        public IntVariable(string Name, int Value, bool IsInitialised) : base(Name, IsInitialised)
+        public IntVariable(string Name, int Value, bool IsInitialised, TipDate tipDate) : base(Name, IsInitialised, tipDate)
         {
             this.Value = Value;
         }
 
-        public IntVariable(string Name, bool IsInitialised) : base(Name, IsInitialised) { }
+        public IntVariable(string Name, bool IsInitialised, TipDate tipDate) : base(Name, IsInitialised,  tipDate) { }
 
         public IntVariable():base(){}
 
