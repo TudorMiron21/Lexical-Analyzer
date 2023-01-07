@@ -19,7 +19,6 @@ namespace Proiect_limbaje
 
                 var parser = new Parser(text);
                 var arboreSintactic = parser.Parseaza();
-                //AfiseazaArbore(arboreSintactic);
 
                 var culoare = Console.ForegroundColor;
                 if (parser.erori.Any())
@@ -32,10 +31,18 @@ namespace Proiect_limbaje
                 }
                 else
                 {
-                    //Evaluator e = new Evaluator(arboreSintactic);
-                    //int res = e.Evalueaza();
-                    //Console.WriteLine(res);
-                    Console.WriteLine("hello");
+                    if (parser.pass_through_evalutaor)
+                    {
+
+                        Evaluator e = new Evaluator(arboreSintactic);
+                        var res = e.Evalueaza();
+                        Console.WriteLine(res);
+                        AfiseazaArbore(arboreSintactic);
+                    }
+                    else
+                    {
+                        Console.WriteLine("hello");
+                    }
                 }
 
             }
@@ -92,8 +99,11 @@ namespace Proiect_limbaje
 
         ExpresieBinaraAtomLexical,
         ExpresieNUmericaAtomLexical,
+        ExpresieDoubleAtomLexical,
         ExpresieParantezeAtomLexical,
         ExpresieLiterara,
+        ExpresieVariabila,
+        ExpresieStringAtomLexical,
 
         TipDateInt,
         TipDateDouble,

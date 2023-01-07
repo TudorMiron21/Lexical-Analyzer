@@ -19,6 +19,7 @@ namespace Proiect_limbaje
         private AtomLexical datatype;
         private AtomLexical var_name;
         private Operatii Operatie;
+        public bool pass_through_evalutaor;
 
         public Parser(string text)
         {
@@ -27,6 +28,7 @@ namespace Proiect_limbaje
             bool equal_found = false;
             bool datatype_found = false;
             Lexer l = new Lexer(text);
+            pass_through_evalutaor = false;
 
             
 
@@ -35,20 +37,23 @@ namespace Proiect_limbaje
             {
                 atom = l.Atom();
                 if (atom.Tip != TipAtomLexical.InvalidAtomLexical
+                    && atom.Tip != TipAtomLexical.SpatiuAtomLexical
                     //atom.Tip != TipAtomLexical.GhilimeleAtomLexical)
                     //atom.Tip != TipAtomLexical.TipDateInt &&
                     //atom.Tip != TipAtomLexical.TipDateDouble&&
                     //atom.Tip != TipAtomLexical.TipDateString&&
                     //atom.Tip != TipAtomLexical.VariabilaAtomLexical
                     )
+                {
 
-                    if(TipAtomLexical.EgalAtomLexical == atom.Tip && !datatype_found)
+                    if (TipAtomLexical.EgalAtomLexical == atom.Tip && !datatype_found)
                         equal_found = true;
-                    if (TipAtomLexical.TipDateInt == atom.Tip || TipAtomLexical.TipDateString == atom.Tip || TipAtomLexical.TipDateDouble == atom.Tip )
+                    if (TipAtomLexical.TipDateInt == atom.Tip || TipAtomLexical.TipDateString == atom.Tip || TipAtomLexical.TipDateDouble == atom.Tip)
                         datatype_found = true;
-                   
-                    
+
+
                     atomi.Add(atom);
+                }
 
             } while (atom.Tip != TipAtomLexical.TerminatorSirAtomLexical);
 
@@ -85,14 +90,19 @@ namespace Proiect_limbaje
 
         private AtomLexical VerificareTip(TipAtomLexical tip)
         {
+            //if (AtomCurent.Tip == tip)
+            //    return AtomCurentSiIncrementeaza();
+
+            //else
+            //{
+            //    erori.Add($"Atom Lexical invalid <{AtomCurent.Tip}>");
+            //    return new AtomLexical(tip, null, null, index);
+            //}
+
             if (AtomCurent.Tip == tip)
                 return AtomCurentSiIncrementeaza();
 
-            else
-            {
-                erori.Add($"Atom Lexical invalid <{AtomCurent.Tip}> .Se astepta  tipul {tip}");
-                return new AtomLexical(tip, null, null, index);
-            }
+            return null;
         }
 
         private Expresie ParseazaTermen()
@@ -103,6 +113,44 @@ namespace Proiect_limbaje
             {
                 var operatorExpresie = AtomCurentSiIncrementeaza();
                 var dreapta = ParseazaFactor();
+
+                if(dreapta is ExpresieVariabila x)
+                {
+                    if(stanga is ExpresieVariabila y)
+                    {
+                        if ((x.TipAtom == TipDate.Int && y.TipAtom == TipDate.String) ||
+                            (x.TipAtom == TipDate.Double && y.TipAtom == TipDate.String) ||
+                            (x.TipAtom == TipDate.String && y.TipAtom == TipDate.Int) ||
+                            (x.TipAtom == TipDate.String && y.TipAtom == TipDate.Double))
+                            erori.Add("eroare operatie intre doua tipuri de date incompatibile");
+                    }
+                    else
+                    if(stanga is ExpresieDouble || stanga is ExpresieNumerica)
+                    {
+                        if (x.TipAtom == TipDate.String)
+                            erori.Add("eroare operatie intre doua tipuri de date incompatibile");
+                    }         
+                }
+                else
+                {
+                    if (stanga is ExpresieVariabila a)
+                    {
+                        if (dreapta is ExpresieDouble || dreapta is ExpresieNumerica)
+                        {
+                            if (a.TipAtom == TipDate.String)
+                                erori.Add("eroare operatie intre doua tipuri de date incompatibile");
+                        }
+
+                    }
+                    else
+                     if (stanga is ExpresieDouble || stanga is ExpresieNumerica)
+                    {
+                        if(dreapta is ExpresieString)
+                        {
+                            erori.Add("eroare operatie intre doua tipuri de date incompatibile");
+                        }
+                    }
+                }
                 stanga = new ExpresieBinara(stanga, operatorExpresie, dreapta);
             }
             return stanga;
@@ -117,7 +165,10 @@ namespace Proiect_limbaje
                 return ParseazaExpresieLiterara_search();
             else
                 if (this.Operatie == Operatii.OperatieMatematica)
-                return ParseazaTermen();
+            {
+                this.pass_through_evalutaor = true;
+                return ParseazaTermen(); 
+            }
 
             return null;
         }
@@ -136,15 +187,28 @@ namespace Proiect_limbaje
 
         private Expresie ParseazaExpresie()
         {
-            if(AtomCurent.Tip== TipAtomLexical.ParantezaDeschisaAtomLexical)
+            if (AtomCurent.Tip == TipAtomLexical.ParantezaDeschisaAtomLexical)
             {
                 var parantezaDeschisa = AtomCurentSiIncrementeaza();
                 var expresie = Parseaza();
                 var parantezaInchisa = VerificareTip(TipAtomLexical.ParantezaInchisaAtomLexical);
                 return new ExpresieParanteza(parantezaDeschisa, expresie, parantezaInchisa);
             }
-            var numar = VerificareTip(TipAtomLexical.NumarIntAtomLexical);//modifica
-            return new ExpresieNumerica(numar);
+            var numarInt = VerificareTip(TipAtomLexical.NumarIntAtomLexical);//modifica
+
+
+            var numarDouble = VerificareTip(TipAtomLexical.NumarDoubleAtomLexical);
+            var variable = VerificareTip(TipAtomLexical.VariabilaAtomLexical);
+
+            if (numarInt != null)
+                return new ExpresieNumerica(numarInt);
+            if (numarDouble != null)
+                return new ExpresieDouble(numarDouble);
+            if (variable != null)
+                return new ExpresieVariabila(variable);
+
+            return null;
+
         }
 
 
@@ -215,8 +279,7 @@ namespace Proiect_limbaje
                 }
                 else
                 {
-                    //last_ghilimea = false;
-              
+                    
                     if (this.datatype.Tip == TipAtomLexical.TipDateInt && AtomCurent.Tip != TipAtomLexical.PunctSiVirgulaAtomLexical)
                     {
                         
@@ -230,8 +293,13 @@ namespace Proiect_limbaje
                         }
                         else
                         {
-                            erori.Add("eroare asignare");
-                            return null;
+                            if (AtomCurent.Tip == TipAtomLexical.NumarDoubleAtomLexical ||
+                                AtomCurent.Tip == TipAtomLexical.VariabilaAtomLexical ||
+                                AtomCurent.Tip == TipAtomLexical.GhilimeleAtomLexical)
+                            {
+                                erori.Add("eroare asignare");
+                                return null;
+                            }
                         }
                       
                     }
@@ -256,30 +324,34 @@ namespace Proiect_limbaje
                             new_string_var.IsInitialised = true;
                         }
                         else
-                            if(first_ghilimea != true && AtomCurent.Tip == TipAtomLexical.VariabilaAtomLexical)
+                            if (first_ghilimea != true)
                         {
-                            erori.Add("eroare ghilimele 1");
-                            return null;
+                            if (AtomCurent.Tip == TipAtomLexical.VariabilaAtomLexical || AtomCurent.Tip == TipAtomLexical.NumarIntAtomLexical)
+                            {
+                                erori.Add("eroare ghilimele 1");
+                                return null;
+                            }
                         }
-
-                        //if (AtomCurent.Tip == TipAtomLexical.GhilimeleAtomLexical || 
-                        //    AtomCurent.Tip == TipAtomLexical.SpatiuAtomLexical ||
-                        //    AtomCurent.Tip == TipAtomLexical.PunctSiVirgulaAtomLexical)
-                        //    last_ghilimea = true;
+                        
 
                     }
                     else
                     if (this.datatype.Tip == TipAtomLexical.TipDateDouble && AtomCurent.Tip != TipAtomLexical.PunctSiVirgulaAtomLexical)
                     {
                         if (AtomCurent.Tip == TipAtomLexical.NumarDoubleAtomLexical)
-                        { //new_double_var.Value = Double.Parse(AtomCurent.Text);
+                        { 
                             new_double_var.Value = (double)AtomCurent.Valoare;
                             new_double_var.IsInitialised = true;
                         }
                         else
                         {
-                            erori.Add("eroare asignare");
-                            return null;
+                            if (AtomCurent.Tip == TipAtomLexical.NumarIntAtomLexical ||
+                                AtomCurent.Tip == TipAtomLexical.VariabilaAtomLexical ||
+                                AtomCurent.Tip == TipAtomLexical.GhilimeleAtomLexical)
+                            {
+                                erori.Add("eroare asignare");
+                                return null;
+                            }
                         }
                     }
                     
@@ -287,12 +359,38 @@ namespace Proiect_limbaje
 
                 if (AtomCurent.Tip == TipAtomLexical.VirgulaAtomLexical)
                 {
+                    foreach (var variable in new_vars)
+                    {
+                        if (int_init && variable.Name == new_var_int.Name && variable.tipDate == new_var_int.tipDate)
+                        {
+                            erori.Add("varibila deja existenta");
+                            return null;
+                        }
+                        else
+                            if (string_init && variable.Name == new_string_var.Name && variable.tipDate == new_string_var.tipDate)
+                        {
+                            erori.Add("varibila deja existenta");
+                            return null;
+                        }
+                        else
+                        if (double_init && variable.Name == new_double_var.Name && variable.tipDate == new_double_var.tipDate)
+                        {
+                            erori.Add("varibila deja existenta");
+                            return null;
+                        }
+
+                    }
+
                     if (int_init)
                         new_vars.Add(new_var_int);
                     if (string_init)
                     {
-                        if(ghilimele_count == 2)
+                        if (ghilimele_count %2 == 0)
+                        {
                             new_vars.Add(new_string_var);
+                            ghilimele_count = 0;
+                            last_ghilimea = true;
+                        }
                         else
                         {
                             erori.Add("eroare ghilimele2");
@@ -307,11 +405,33 @@ namespace Proiect_limbaje
 
                 if (AtomCurent.Tip == TipAtomLexical.PunctSiVirgulaAtomLexical)
                 {
+                    foreach (var variable in GlobalVars.vec_vars.Concat(new_vars))
+                    {
+                        if (int_init && variable.Name == new_var_int.Name && variable.tipDate == new_var_int.tipDate)
+                        {
+                            erori.Add("varibila deja existenta");
+                            return null;
+                        }
+                        else
+                            if(string_init && variable.Name == new_string_var.Name && variable.tipDate == new_string_var.tipDate)
+                        {
+                            erori.Add("varibila deja existenta");
+                            return null;
+                        }
+                        else
+                        if (double_init && variable.Name == new_double_var.Name && variable.tipDate == new_double_var.tipDate)
+                        {
+                            erori.Add("varibila deja existenta");
+                            return null;
+                        }
+
+                    }
+
                     if (int_init)
                         new_vars.Add(new_var_int);
                     if (string_init)
                     {
-                        if (ghilimele_count == 2 && last_ghilimea == true)
+                        if (ghilimele_count % 2 == 0 && last_ghilimea == true)
                             new_vars.Add(new_string_var);
                         else
                         {
@@ -350,11 +470,17 @@ namespace Proiect_limbaje
             IntVariable new_var_int = default;
             StringVariable new_string_var = default;
             DoubleVariable new_double_var = default;
+            int ghilimele_count = 0;
+            bool first_ghilimea = false;
+            bool last_ghilimea = true;
+
+            Variable var_to_be_swaped = default;
 
             while (index < atomilexicali.Length)
             {
                 if(!after_equal)
                 {
+                    bool variable_found = false;
                     if(AtomCurent.Tip == TipAtomLexical.VariabilaAtomLexical)
                     {
                         foreach (var variable in GlobalVars.vec_vars)
@@ -363,6 +489,7 @@ namespace Proiect_limbaje
                             {
                                 if(variable.tipDate == TipDate.Int)
                                 {
+
                                     new_var_int = (IntVariable)variable;
                                     new_var_int.IsInitialised = true;
                                     this.datatype = new AtomLexical(TipAtomLexical.TipDateInt, "", null, 0);
@@ -384,12 +511,17 @@ namespace Proiect_limbaje
                                     this.datatype = new AtomLexical(TipAtomLexical.TipDateDouble,"",null,0);
 
                                 }
-                                
-                                GlobalVars.vec_vars.Remove(variable);
+
+                                variable_found = true;
+                                //GlobalVars.vec_vars.Remove(variable);
+                                var_to_be_swaped = variable;
                                 break;
                             }
 
                         }
+                        if (!variable_found)
+                            throw new Exception($"variabila {AtomCurent.Text} nu exista");
+                        
 
                     }
 
@@ -399,51 +531,99 @@ namespace Proiect_limbaje
                 else
                 {
 
-                    if (this.datatype.Tip == TipAtomLexical.TipDateInt)
+                    if (this.datatype.Tip == TipAtomLexical.TipDateInt && AtomCurent.Tip != TipAtomLexical.PunctSiVirgulaAtomLexical)
                     {
-                        if (AtomCurent.Tip == TipAtomLexical.NumarIntAtomLexical && AtomCurent.Tip != TipAtomLexical.PunctSiVirgulaAtomLexical)
+
+                        if (AtomCurent.Tip == TipAtomLexical.NumarIntAtomLexical)
                         {
-                            //int value;
-                            //Int32.TryParse(AtomCurent.Text, out value);
-                              
                             new_var_int.Value = (int)AtomCurent.Valoare;
                             new_var_int.IsInitialised = true;
-                            
                         }
-                       
+                        else
+                        {
+                            if (AtomCurent.Tip == TipAtomLexical.NumarDoubleAtomLexical ||
+                                AtomCurent.Tip == TipAtomLexical.VariabilaAtomLexical ||
+                                AtomCurent.Tip == TipAtomLexical.GhilimeleAtomLexical)
+                            {
+                                erori.Add("eroare asignare");
+                                return null;
+                            }
+                        }                                           
                     }
                     else
 
-                    if (this.datatype.Tip == TipAtomLexical.TipDateString || this.datatype.Tip == TipAtomLexical.EgalAtomLexical)
+                    if (this.datatype.Tip == TipAtomLexical.TipDateString)/*|| this.datatype.Tip == TipAtomLexical.EgalAtomLexical)*/
                     {
-                        if (AtomCurent.Tip != TipAtomLexical.PunctSiVirgulaAtomLexical)
-                        {
 
+                        if (ghilimele_count == 2)
+                            if (AtomCurent.Tip != TipAtomLexical.SpatiuAtomLexical && AtomCurent.Tip != TipAtomLexical.PunctSiVirgulaAtomLexical)
+                                last_ghilimea = false;
+
+                        if (AtomCurent.Tip == TipAtomLexical.GhilimeleAtomLexical)
+                        {
+                            ghilimele_count++;
+                            first_ghilimea = true;
+                        }
+
+                        if (ghilimele_count == 1 && AtomCurent.Tip != TipAtomLexical.GhilimeleAtomLexical && first_ghilimea == true)
+                        {
                             new_string_var.Value += AtomCurent.Text;
                             new_string_var.IsInitialised = true;
                         }
-                 
+                        else
+                            if (first_ghilimea != true)
+                        {
+                            if (AtomCurent.Tip == TipAtomLexical.VariabilaAtomLexical || AtomCurent.Tip == TipAtomLexical.NumarIntAtomLexical)
+                            {
+                                erori.Add("eroare ghilimele 1");
+                                return null;
+                            }
+                        }
+
 
                     }
                     else
                     if (this.datatype.Tip == TipAtomLexical.TipDateDouble && AtomCurent.Tip != TipAtomLexical.PunctSiVirgulaAtomLexical)
                     {
+                 
                         if (AtomCurent.Tip == TipAtomLexical.NumarDoubleAtomLexical)
-                        { //new_double_var.Value = Double.Parse(AtomCurent.Text);
+                        {
                             new_double_var.Value = (double)AtomCurent.Valoare;
                             new_double_var.IsInitialised = true;
                         }
-                 
+                        else
+                        {
+                            if (AtomCurent.Tip == TipAtomLexical.NumarIntAtomLexical ||
+                                AtomCurent.Tip == TipAtomLexical.VariabilaAtomLexical ||
+                                AtomCurent.Tip == TipAtomLexical.GhilimeleAtomLexical)
+                            {
+                                erori.Add("eroare asignare");
+                                return null;
+                            }
+                        }
+
                     }
 
                     if (AtomCurent.Tip == TipAtomLexical.PunctSiVirgulaAtomLexical)
                     {
+                        GlobalVars.vec_vars.Remove(var_to_be_swaped);
+
                         if (this.datatype.Tip == TipAtomLexical.TipDateInt)
                             GlobalVars.vec_vars.Add(new_var_int);
                         if (this.datatype.Tip == TipAtomLexical.TipDateDouble)
                             GlobalVars.vec_vars.Add(new_double_var);
                         if (this.datatype.Tip == TipAtomLexical.TipDateString)
-                            GlobalVars.vec_vars.Add(new_string_var);
+                        { 
+                            
+                            if (ghilimele_count % 2 == 0 && last_ghilimea == true)
+                                GlobalVars.vec_vars.Add(new_string_var);
+                            else
+                            {
+                                erori.Add("eroare ghilimele2");
+                                return null;
+                            }
+                            
+                        }
                         has_final_atom = true;
                     }
                 }
@@ -455,5 +635,6 @@ namespace Proiect_limbaje
 
             return expresie;
         }
+
     }
 }

@@ -19,6 +19,9 @@ namespace Proiect_limbaje
 
         public IntVariable():base(){}
 
-
+        public override dynamic get_value()
+        {
+            return Value;
+        }
     }
 }

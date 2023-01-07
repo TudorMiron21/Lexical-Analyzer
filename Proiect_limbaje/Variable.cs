@@ -22,6 +22,8 @@ namespace Proiect_limbaje
             this.tipDate = tipDate;
         }
 
+        public abstract dynamic get_value();
+
         public Variable() { }
     }
 }

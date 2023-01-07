@@ -17,5 +17,10 @@ namespace Proiect_limbaje
         public StringVariable(string Name, bool IsInitialised, TipDate tipDate) : base(Name, IsInitialised, tipDate) { }
 
         public StringVariable() : base() { }
+
+        public override dynamic get_value()
+        {
+            return Value; 
+        }
     }
 }

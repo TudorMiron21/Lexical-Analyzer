@@ -9,18 +9,18 @@ namespace Proiect_limbaje
     internal class ExpresieNumerica : Expresie
     {
 
-        public AtomLexical Numar { get; }
+        public AtomLexical NumarInt { get; }
 
         public ExpresieNumerica(AtomLexical numar)
         {
-            Numar = numar;
+            NumarInt = numar;
         }
 
         public override TipAtomLexical Tip => TipAtomLexical.ExpresieNUmericaAtomLexical;
 
         public override IEnumerable<Nod> GetCopii()
         {
-            yield return Numar;
+            yield return NumarInt;
         }
     }
 }

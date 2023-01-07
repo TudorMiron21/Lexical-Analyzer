@@ -18,5 +18,10 @@ namespace Proiect_limbaje
         public DoubleVariable(string Name, bool IsInitialised, TipDate tipDate) : base(Name, IsInitialised, tipDate) { }
 
         public DoubleVariable() : base() { }
+
+        public override dynamic get_value()
+        {
+            return Value;
+        }
     }
 }

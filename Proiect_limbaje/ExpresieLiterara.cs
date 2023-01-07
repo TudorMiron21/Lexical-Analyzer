@@ -28,7 +28,8 @@ namespace Proiect_limbaje
 
         public override IEnumerable<Nod> GetCopii()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            return Expresie;
         }
     }
 }
