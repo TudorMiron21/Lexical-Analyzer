@@ -63,9 +63,9 @@ namespace Proiect_limbaje
             }
 
 
-
             if (expresie is ExpresieBinara b)
             {
+               
                 if(b.OperatorExpresie.Tip == TipAtomLexical.PlusAtomLexical) 
                 {
                     return EvalueazaExpresie(b.Stanga) + EvalueazaExpresie(b.Dreapta);
@@ -84,7 +84,7 @@ namespace Proiect_limbaje
                         throw new Exception("Impartire la 0");
                     return EvalueazaExpresie(b.Stanga) / EvalueazaExpresie(b.Dreapta);
                 }
-
+                
             }
             if (expresie is ExpresieParanteza p)
                 return EvalueazaExpresie(p.Expresie);

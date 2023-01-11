@@ -10,42 +10,44 @@ namespace Proiect_limbaje
     {
         static void Main(string[] args)
         {
-            while (true)
-            {
-                Console.Write("> ");
-                var text = Console.ReadLine();
-                if (string.IsNullOrWhiteSpace(text))
-                    return;
+            //while (true)
+            //{
+            //    Console.Write("> ");
+            //    var text = Console.ReadLine();
+            //    if (string.IsNullOrWhiteSpace(text))
+            //        return;
 
-                var parser = new Parser(text);
-                var arboreSintactic = parser.Parseaza();
+            //    var parser = new Parser(text);
+            //    var arboreSintactic = parser.Parseaza();
 
-                var culoare = Console.ForegroundColor;
-                if (parser.erori.Any())
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    foreach (var eroare in parser.erori)
-                        Console.WriteLine(eroare);
+            //    var culoare = Console.ForegroundColor;
+            //    if (parser.erori.Any())
+            //    {
+            //        Console.ForegroundColor = ConsoleColor.Red;
+            //        foreach (var eroare in parser.erori)
+            //            Console.WriteLine(eroare);
 
-                    Console.ForegroundColor = culoare;
-                }
-                else
-                {
-                    if (parser.pass_through_evalutaor)
-                    {
+            //        Console.ForegroundColor = culoare;
+            //    }
+            //    else
+            //    {
+            //        if (parser.pass_through_evalutaor)
+            //        {
 
-                        Evaluator e = new Evaluator(arboreSintactic);
-                        var res = e.Evalueaza();
-                        Console.WriteLine(res);
-                        AfiseazaArbore(arboreSintactic);
-                    }
-                    else
-                    {
-                        Console.WriteLine("hello");
-                    }
-                }
+            //            Evaluator e = new Evaluator(arboreSintactic);
+            //            var res = e.Evalueaza();
+            //            Console.WriteLine(res);
+            //            AfiseazaArbore(arboreSintactic);
+            //        }
+            //        else
+            //        {
+            //            Console.WriteLine("hello");
+            //        }
+            //    }
 
-            }
+            //}
+            ReadChoice.read();
+
         }
         static void AfiseazaArbore(Nod nod, string indentare = "", bool ultimulNod = true)
         {
@@ -82,7 +84,7 @@ namespace Proiect_limbaje
             }
         }
     }
-   
+
     enum TipAtomLexical
     {
         NumarIntAtomLexical,
